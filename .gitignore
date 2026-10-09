@@ -1,0 +1,16 @@
+# data (too large for git: put the Olist CSVs in data/raw and run the build script)
+data/raw/*.csv
+data/*.db
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# node
+node_modules/
+frontend/dist/
+
+# models are trained locally (python -m scripts.train_models)
+data/models/
