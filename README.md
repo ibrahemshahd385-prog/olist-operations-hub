@@ -5,7 +5,7 @@ HVIA Data & AI Solutions, training task, Batch 2.
 
 **Status:** all four modules are built: orders & NF-e invoices, smart logistics, seller performance, analytics & AI.
 
-**Live demo:** see [deploy/huggingface](deploy/huggingface) (free Hugging Face Space, opens in any browser).
+**Live demo:** runs on Render's free plan, built from the `Dockerfile` in this repository. The free server sleeps after 15 minutes without visitors: the first visit wakes it in about a minute. Orders registered on the demo are cleared each time it sleeps.
 
 ---
 
@@ -160,9 +160,11 @@ Open http://localhost:5173
 
 **One-server option:** run `npm run build` in `frontend/`, then only the backend. FastAPI serves the built app at http://localhost:8000.
 
-**Tests:** `cd backend` then `python -m pytest` (32 tests: access-key rules, the full order flow, leakage checks and model quality, seller scores, analytics numbers that must match Task 1, Portuguese topic rules). They run on an in-memory copy of the real data.
+**Tests:** `cd backend` then `python -m pytest` (33 tests: access-key rules, the full order flow, leakage checks and model quality, seller scores, analytics numbers that must match Task 1, Portuguese topic rules). They run on an in-memory copy of the real data.
 
 To start over with a clean database, run `python -m scripts.build_database` again.
+
+**Docker (the live demo):** `docker build -t olist-ops .` then `docker run -p 8000:8000 -e PORT=8000 olist-ops`, and open http://localhost:8000. The build creates the database, trains the models and runs `python -m scripts.precompute`, which saves the heavy history numbers (analytics, seller scores, busiest routes) so the small free server answers at once instead of computing them on the first visit.
 
 ---
 
@@ -195,6 +197,7 @@ backend/
     main.py            app, error handling, routers
     config.py          paths and business constants
     db.py              sqlite3 connection, upgrades an existing database
+    snapshot.py        saved history numbers for the live demo (optional)
     schema.sql         the original tables, invoices and order events
     migrations.sql     tables added by modules 2-4 (safe to run again)
     schemas.py         request validation (Pydantic)
@@ -202,8 +205,9 @@ backend/
     routers/           orders, catalog, logistics, sellers, analytics
     services/          workflow, invoices, orders, catalog, logistics, sellers, analytics
     ml/                features.py (shared by training and live use), predictor.py, reviews.py
-  scripts/build_database.py, scripts/train_models.py
+  scripts/build_database.py, scripts/train_models.py, scripts/precompute.py
   tests/
+Dockerfile             one container for the live demo (Render)
 frontend/
   src/
     pages/             Orders, NewOrder, OrderDetail, Invoice, Logistics, Sellers, SellerDetail, Analytics

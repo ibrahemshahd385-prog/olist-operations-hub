@@ -19,6 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app import snapshot  # noqa: E402
 from app.config import DB_PATH, RAW_DATA_DIR  # noqa: E402
 
 SCHEMA_FILE = Path(__file__).resolve().parent.parent / "app" / "schema.sql"
@@ -72,6 +73,7 @@ def simulated_cnpj(seller_id: str) -> str:
 def build(db_path: Path = DB_PATH) -> None:
     start = time.time()
     unpack_dataset_if_needed()
+    snapshot.clear()   # saved numbers from an older database must not survive a rebuild
     db_path.parent.mkdir(parents=True, exist_ok=True)
     if db_path.exists():
         db_path.unlink()

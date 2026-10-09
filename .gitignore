@@ -14,3 +14,4 @@ frontend/dist/
 
 # models are trained locally (python -m scripts.train_models)
 data/models/
+data/cache/

@@ -31,6 +31,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostin
 from sklearn.metrics import average_precision_score, mean_absolute_error, roc_auc_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app import snapshot  # noqa: E402
 from app.config import DB_PATH, MODELS_DIR  # noqa: E402
 from app.db import ensure_schema  # noqa: E402
 from app.ml import features as F  # noqa: E402
@@ -113,6 +114,7 @@ def calibrate_offset(pred_log, actual_days, target):
 
 def main():
     t0 = time.time()
+    snapshot.clear()   # the saved review numbers come from the models about to be replaced
     conn = sqlite3.connect(DB_PATH)
     ensure_schema(conn)
     geo = F.GeoLookup(conn)

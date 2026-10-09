@@ -4,11 +4,14 @@ Run (from the backend folder):
     uvicorn app.main:app --reload
 Interactive API docs: http://localhost:8000/docs
 """
+import threading
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from . import snapshot
 from .config import DB_PATH, FRONTEND_DIST
 from .db import connect, ensure_schema
 from .errors import BusinessRuleError, NotFoundError, ValidationFailed
@@ -19,6 +22,26 @@ if DB_PATH.exists():
     _conn = connect()
     ensure_schema(_conn)
     _conn.close()
+
+# On the live demo server the heavy history numbers are saved at build time (app/snapshot.py).
+snapshot.load()
+
+
+def _load_models_in_background():
+    """Read the trained models from disk while the first pages load, so the first
+    delivery quote or review analysis does not wait for them."""
+    from .ml import predictor, reviews
+    try:
+        reviews.available()
+        if DB_PATH.exists():
+            conn = connect()
+            predictor.warm_up(conn)
+            conn.close()
+    except Exception:
+        pass  # a missing model is reported by the screens that use it
+
+
+threading.Thread(target=_load_models_in_background, daemon=True).start()
 
 app = FastAPI(
     title="Olist Operations Hub",

@@ -38,3 +38,25 @@ def test_praise_is_not_a_complaint():
 def test_sentiment_model():
     assert reviews.analyze("Péssimo, não recebi e ninguém responde")["sentiment"] > 0.8
     assert reviews.analyze("Excelente, chegou antes do prazo. Recomendo!")["sentiment"] < 0.2
+
+
+def test_snapshot_gives_the_same_numbers(conn):
+    """The live demo loads the heavy numbers from a file saved at build time (app/snapshot.py)."""
+    import shutil
+    import tempfile
+    from pathlib import Path
+
+    from app import snapshot
+
+    folder = Path(tempfile.mkdtemp())
+    path = folder / "snapshot.pkl"
+    try:
+        snapshot.save(conn, path)
+        before = analytics.overview(conn)
+        analytics._cache.clear()
+        assert snapshot.load(path)
+        assert analytics._cache["overview"] == before
+        snapshot.clear(path)
+        assert not snapshot.load(path)
+    finally:
+        shutil.rmtree(folder)

@@ -41,6 +41,12 @@ def available() -> bool:
     return _bundle() is not None
 
 
+def warm_up(conn: sqlite3.Connection) -> None:
+    """Load the models and the zip map now, instead of during the first quote."""
+    if available():
+        _geo(conn)
+
+
 def metrics():
     b = _bundle()
     if b is None:

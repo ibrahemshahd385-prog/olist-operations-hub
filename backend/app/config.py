@@ -13,6 +13,7 @@ RAW_DATA_DIR = PROJECT_DIR / "data" / "raw"          # the original Olist CSV fi
 DB_PATH = PROJECT_DIR / "data" / "olist.db"          # SQLite database built from them
 FRONTEND_DIST = PROJECT_DIR / "frontend" / "dist"     # React production build (optional)
 MODELS_DIR = PROJECT_DIR / "data" / "models"         # trained models (Module 2), created by scripts/train_models.py
+SNAPSHOT_PATH = PROJECT_DIR / "data" / "cache" / "snapshot.pkl"  # optional, see app/snapshot.py
 
 # ---------------------------------------------------------------------------
 # Business rules (each one is backed by the data or by Brazilian practice)
